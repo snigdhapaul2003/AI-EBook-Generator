@@ -709,10 +709,9 @@ def display_sidebar():
         
         # Resources
         st.markdown("### 📚 Resources")
-        st.markdown("[📖 Documentation](https://github.com/your-repo)")
-        st.markdown("[🐛 Report Issues](https://github.com/your-repo/issues)")
-        st.markdown("[💬 Discord Community](https://discord.gg/your-server)")
-        st.markdown("[⭐ Star on GitHub](https://github.com/your-repo)")
+        st.markdown("[📖 Documentation](https://github.com/snigdhapaul2003/AI-EBook-Generator)")
+        st.markdown("[🐛 Report Issues](https://github.com/snigdhapaul2003/AI-EBook-Generator/issues)")
+        st.markdown("[⭐ Star on GitHub](https://github.com/snigdhapaul2003/AI-EBook-Generator)")
         
         # Footer
         st.markdown("---")
