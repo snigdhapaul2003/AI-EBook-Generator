@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ebook-generator"
+version = "1.0.0"
+description = "AI-powered e-book generation system using LangGraph and Google's Gemini API"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "snigdhapaul2003", email = "snigdhapaul2003@example.com"}
+]
+keywords = ["ai", "ebook", "generation", "langgraph", "gemini", "nlp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+    "ipython>=8.0.0",
+    "ipywidgets>=8.0.0",
+    "langgraph>=0.2.0",
+    "google-generativeai>=0.3.0",
+    "langchain>=0.1.0",
+    "langchain-google-genai>=1.0.0",
+    "python-docx>=0.8.11",
+    "reportlab>=4.0.0",
+    "markdown>=3.5.0",
+    "typing-extensions>=4.8.0",
+    "pydantic>=2.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0"
+]
+colab = [
+    "google-colab>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/snigdhapaul2003/ebook-generator"
+Documentation = "https://github.com/snigdhapaul2003/ebook-generator#readme"
+Repository = "https://github.com/snigdhapaul2003/ebook-generator.git"
+"Bug Tracker" = "https://github.com/snigdhapaul2003/ebook-generator/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "docs*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"

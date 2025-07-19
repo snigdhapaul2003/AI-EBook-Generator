@@ -1,0 +1,6 @@
+langgraph 
+google-genai 
+python-docx 
+fpdf
+pydantic
+python-dotenv
