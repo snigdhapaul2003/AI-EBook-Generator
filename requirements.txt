@@ -4,3 +4,4 @@ python-docx
 fpdf
 pydantic
 python-dotenv
+plotly
