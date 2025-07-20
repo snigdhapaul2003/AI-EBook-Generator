@@ -4,7 +4,7 @@ A professional AI-powered e-book generation system using LangGraph and Google's 
 
 🚀 **Try it now**: [Launch the E-Book Generator App](https://ai-ebook-generator.streamlit.app/)
 
-![E-Book Generator App Preview](assets/app-preview.png)
+![E-Book Generator App Preview](assets/app_preview.png)
 
 ## Features
 
