@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import json
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Any, Optional
 import time
 import asyncio
@@ -170,6 +171,67 @@ if 'ebook_result' not in st.session_state:
     st.session_state.ebook_result = None
 if 'generation_history' not in st.session_state:
     st.session_state.generation_history = []
+
+# --- Visitor & E-Book Counter Logic ---
+VISITOR_FILE = "visitor_count.txt"
+EBOOK_FILE = "ebook_count.txt"
+
+def get_and_increment_visitor_count():
+    # Use session state to avoid double counting in same session
+    if 'visitor_counted' not in st.session_state:
+        # Ensure file exists
+        if not Path(VISITOR_FILE).exists():
+            with open(VISITOR_FILE, "w") as f:
+                f.write("0")
+        # Read, increment, and write back
+        with open(VISITOR_FILE, "r+") as f:
+            try:
+                count = int(f.read().strip())
+            except Exception:
+                count = 0
+            count += 1
+            f.seek(0)
+            f.write(str(count))
+            f.truncate()
+        st.session_state['visitor_counted'] = True
+        return count
+    else:
+        # Just read
+        if not Path(VISITOR_FILE).exists():
+            return 0
+        with open(VISITOR_FILE, "r") as f:
+            try:
+                count = int(f.read().strip())
+            except Exception:
+                count = 0
+        return count
+
+def get_and_increment_ebook_count(increment=False):
+    # Only increment if told to (i.e., after successful generation)
+    if increment:
+        # Ensure file exists
+        if not Path(EBOOK_FILE).exists():
+            with open(EBOOK_FILE, "w") as f:
+                f.write("0")
+        with open(EBOOK_FILE, "r+") as f:
+            try:
+                count = int(f.read().strip())
+            except Exception:
+                count = 0
+            count += 1
+            f.seek(0)
+            f.write(str(count))
+            f.truncate()
+        return count
+    else:
+        if not Path(EBOOK_FILE).exists():
+            return 0
+        with open(EBOOK_FILE, "r") as f:
+            try:
+                count = int(f.read().strip())
+            except Exception:
+                count = 0
+        return count
 
 def display_header():
     """Display the main header with animations"""
@@ -727,6 +789,130 @@ def display_sidebar():
 def main():
     """Main application function"""
     display_header()
+
+    # --- Elegant counter blocks for visitors and e-books generated ---
+    visitor_count = get_and_increment_visitor_count()
+    ebook_count = get_and_increment_ebook_count()
+    col_vis, col_ebk = st.columns([1, 1])
+    with col_vis:
+        st.markdown(f'''
+        <div style="
+            background: linear-gradient(120deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.9));
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        ">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.2rem;">
+                <div style="
+                    background: rgba(255, 255, 255, 0.2);
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <span style="font-size: 1.3rem;">👀</span>
+                </div>
+                <span style="
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    background: linear-gradient(90deg, #ffffff, #e0e0ff);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                ">{visitor_count:,}</span>
+            </div>
+            <div style="
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05rem;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.9);
+            ">ALL-TIME VISITORS</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    with col_ebk:
+        st.markdown(f'''
+        <div style="
+            background: linear-gradient(120deg, rgba(76, 175, 80, 0.85), rgba(56, 142, 60, 0.9));
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        ">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.2rem;">
+                <div style="
+                    background: rgba(255, 255, 255, 0.2);
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <span style="font-size: 1.3rem;">📘</span>
+                </div>
+                <span style="
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    background: linear-gradient(90deg, #ffffff, #e0ffe0);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                ">{ebook_count:,}</span>
+            </div>
+            <div style="
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05rem;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.9);
+            ">TOTAL E-BOOKS GENERATED</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+    # Explanation about session vs. total stats
+    st.markdown('''
+    <div style="
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        margin: -0.3rem 0 0.8rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    ">
+        <div style="
+            background: rgba(255, 255, 255, 0.1);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        ">
+            <span style="font-size: 0.7rem;">ℹ️</span>
+        </div>
+        <p style="
+            margin: 0;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        ">The numbers above represent all-time platform usage.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+
     display_stats()
     display_sidebar()
     
@@ -765,10 +951,12 @@ def main():
                 if result:
                     st.session_state.ebook_result = result
                     st.session_state.generation_state = 'complete'
+                    # Increment e-book count only on successful generation
+                    ebook_count = get_and_increment_ebook_count(increment=True)
                     display_result(result)
                 else:
-                        st.session_state.generation_state = 'error'
-                        st.error("❌ Generation failed. Please check your inputs and try again.")
+                    st.session_state.generation_state = 'error'
+                    st.error("❌ Generation failed. Please check your inputs and try again.")
         
         # Display generation steps
         if st.session_state.generation_state == 'generating':
