@@ -170,6 +170,9 @@ output/
 *.epub
 temp/
 logs/
+reviews.txt
+visitor_count.txt
+ebook_count.txt
 
 # API Keys and sensitive data
 .env

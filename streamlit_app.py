@@ -171,10 +171,13 @@ if 'ebook_result' not in st.session_state:
     st.session_state.ebook_result = None
 if 'generation_history' not in st.session_state:
     st.session_state.generation_history = []
+if 'reviews' not in st.session_state:
+    st.session_state.reviews = []
 
 # --- Visitor & E-Book Counter Logic ---
 VISITOR_FILE = "visitor_count.txt"
 EBOOK_FILE = "ebook_count.txt"
+REVIEWS_FILE = "reviews.txt"
 
 def get_and_increment_visitor_count():
     # Use session state to avoid double counting in same session
@@ -232,6 +235,33 @@ def get_and_increment_ebook_count(increment=False):
             except Exception:
                 count = 0
         return count
+        
+def load_reviews():
+    """Load reviews from file"""
+    if not Path(REVIEWS_FILE).exists():
+        return []
+    
+    try:
+        with open(REVIEWS_FILE, "r", encoding="utf-8") as f:
+            import json
+            return json.loads(f.read())
+    except Exception as e:
+        print(f"Error loading reviews: {e}")
+        return []
+        
+def save_review(review_data):
+    """Save a new review to the file"""
+    reviews = load_reviews()
+    reviews.append(review_data)
+    
+    try:
+        with open(REVIEWS_FILE, "w", encoding="utf-8") as f:
+            import json
+            f.write(json.dumps(reviews, indent=2))
+        return True
+    except Exception as e:
+        print(f"Error saving review: {e}")
+        return False
 
 def display_header():
     """Display the main header with animations"""
@@ -916,7 +946,7 @@ def main():
     display_sidebar()
     
     # Main content area
-    tab1, tab2, tab3, tab4 = st.tabs(["🚀 Generate", "📚 Sample Books", "📊 Analytics", "⚙️ Settings"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🚀 Generate", "📚 Sample Books", "📊 Analytics", "⭐ Reviews", "⚙️ Settings"])
     
     with tab1:
         # Input form
@@ -1184,6 +1214,138 @@ def main():
             st.plotly_chart(fig_sample, use_container_width=True)
     
     with tab4:
+        st.markdown("### ⭐ Community Reviews")
+        st.markdown("*Read what others think about the e-books generated with our tool or leave your own review!*")
+        
+        # Load reviews when tab is opened
+        if 'reviews_loaded' not in st.session_state:
+            st.session_state.reviews = load_reviews()
+            st.session_state.reviews_loaded = True
+            
+        # Add review section
+        st.markdown("#### ✍️ Write a Review")
+        with st.form("review_form"):
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                name = st.text_input("Your Name", placeholder="Anonymous")
+                review_text = st.text_area("Your Review", placeholder="Share your experience with the AI E-Book Generator...", height=100)
+            with col2:
+                rating = st.slider("Rating", 1, 5, 5, 1)
+                st.markdown("⭐" * rating)
+            
+            submit_review = st.form_submit_button("Submit Review")
+            
+            if submit_review:
+                if not review_text:
+                    st.error("Please write a review before submitting.")
+                else:
+                    # Create review object
+                    review_data = {
+                        "name": name if name else "Anonymous",
+                        "rating": rating,
+                        "text": review_text,
+                        "date": datetime.now().strftime("%Y-%m-%d"),
+                        "verified": bool(st.session_state.generation_history)
+                    }
+                    
+                    # Save to file and update session state
+                    if save_review(review_data):
+                        st.session_state.reviews.append(review_data)
+                        st.success("✅ Thank you for your review!")
+                        st.balloons()
+                    else:
+                        st.error("❌ There was a problem saving your review. Please try again.")
+        
+        # Display reviews
+        st.markdown("#### 📝 What People Are Saying")
+        
+        reviews = st.session_state.reviews
+        
+        if not reviews:
+            st.info("🔍 No reviews yet. Be the first to share your thoughts!")
+        else:
+            # Display average rating
+            avg_rating = sum(r["rating"] for r in reviews) / len(reviews)
+            col1, col2 = st.columns([1, 4])
+            with col1:
+                st.markdown(f"### {avg_rating:.1f}/5.0")
+            with col2:
+                st.markdown(f"⭐" * round(avg_rating) + f" ({len(reviews)} reviews)")
+            
+            # Sort reviews by date (newest first)
+            sorted_reviews = sorted(reviews, key=lambda x: x.get("date", ""), reverse=True)
+            
+            # Display featured reviews (highest rated first)
+            st.markdown("#### ⭐ Featured Reviews")
+            featured = sorted(reviews, key=lambda x: (x.get("rating", 0), len(x.get("text", ""))), reverse=True)[:3]
+            
+            for review in featured:
+                with st.container():
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background: linear-gradient(120deg, rgba(60, 60, 70, 0.15), rgba(40, 40, 50, 0.15));
+                            border-radius: 12px;
+                            padding: 1rem;
+                            margin-bottom: 1rem;
+                            border: 1px solid rgba(255, 255, 255, 0.05);
+                            backdrop-filter: blur(10px);
+                        ">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <div>
+                                    <span style="font-weight: 600; font-size: 1rem; color: rgba(255, 255, 255, 0.9);">{review.get("name", "Anonymous")}</span>
+                                    <span style="margin-left: 0.5rem; padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); border-radius: 4px; font-size: 0.7rem; color: #4CAF50;">{
+                                        "✓ Verified User" if review.get("verified") else ""
+                                    }</span>
+                                </div>
+                                <div style="color: #FFD700;">{"⭐" * review.get("rating", 5)}</div>
+                            </div>
+                            <p style="margin: 0.5rem 0; color: rgba(255, 255, 255, 0.8); font-style: italic;">"{review.get("text", "")}"</p>
+                            <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); text-align: right;">{review.get("date", "")}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+            
+            # Show all reviews with pagination
+            st.markdown("#### 📋 All Reviews")
+            
+            # Simple pagination 
+            reviews_per_page = 5
+            if 'review_page' not in st.session_state:
+                st.session_state.review_page = 0
+            
+            total_pages = max(1, (len(sorted_reviews) + reviews_per_page - 1) // reviews_per_page)
+            
+            # Display page controls
+            col1, col2, col3 = st.columns([1, 3, 1])
+            with col1:
+                if st.button("◀️ Previous") and st.session_state.review_page > 0:
+                    st.session_state.review_page -= 1
+                    st.rerun()
+            with col2:
+                st.write(f"Page {st.session_state.review_page + 1} of {total_pages}")
+            with col3:
+                if st.button("Next ▶️") and st.session_state.review_page < total_pages - 1:
+                    st.session_state.review_page += 1
+                    st.rerun()
+            
+            # Display reviews for current page
+            start_idx = st.session_state.review_page * reviews_per_page
+            end_idx = min(start_idx + reviews_per_page, len(sorted_reviews))
+            
+            for review in sorted_reviews[start_idx:end_idx]:
+                with st.container():
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"**{review.get('name', 'Anonymous')}** {'✓ Verified' if review.get('verified') else ''}")
+                        st.markdown(f"_{review.get('text', '')}_")
+                    with col2:
+                        st.markdown(f"⭐ {review.get('rating', 5)}/5")
+                        st.caption(review.get('date', ''))
+                    st.markdown("---")
+    
+    with tab5:
         st.markdown("### ⚙️ Application Settings")
         
         # Load current settings
