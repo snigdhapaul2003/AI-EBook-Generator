@@ -2,6 +2,8 @@
 
 A professional AI-powered e-book generation system using LangGraph and Google's Gemini API.
 
+🚀 **Try it now**: [Launch the E-Book Generator App](https://ai-ebook-generator.streamlit.app/)
+
 ## Features
 
 - **AI-Powered Content Generation**: Uses Google's Gemini API for intelligent content creation
