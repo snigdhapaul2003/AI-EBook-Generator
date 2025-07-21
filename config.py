@@ -99,6 +99,9 @@ PROMPTS = {
 
     Strict Guidelines:
     - Write in an engaging, professional style for {target_audience}
+    - It must have a natural variability in rhythm, sentence structure and pacing. Don't write like a machine. Write like human, with emotions. Some may have long and flowing paragraph, while some may use short and punchy bursts.
+    - Let the arc of each chapter feel unique — don’t make it formulaic.
+    - Sometimes, when necessary, instead of using a scenario to illustrate, use it to reveal. Embrace emotional layering. Let paragraphs slow down where there’s vulnerability and pick up where there's clarity. Interrupt the flow once in a while. 
     - Use a {tone} tone throughout the writing. Add variety, don't keep the tone too polished and the book is generalized for all types of readers.
     - Begin with a compelling hook — start strong with a vivid moment, a bold or surprising insight, a relatable struggle, or an emotionally charged observation that immediately connects with the reader’s experience or curiosity. But don't start each chapter with same thing.
     - Maintain a conversational, emotionally intelligent, and encouraging tone. Write in second person (“you”) to build intimacy. Make it feel like a supportive, wise friend or mentor is sitting across the table, talking directly to the reader.
